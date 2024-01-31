@@ -1,7 +1,9 @@
-import io, math, re
+import io
+import math
+import re
 import os
 import sqlite3
-from flask import Flask, render_template, request, g ,redirect, url_for, jsonify
+from flask import Flask, render_template, request, g, redirect, url_for, jsonify
 
 app = Flask(__name__)
 
@@ -46,8 +48,8 @@ def tokenize(s):
     for t in tokens:
         if re.search('\w', t):
             # t contains at least 1 alphanumeric character
-            t = re.sub('^\W*', '', t) # trim leading non-alphanumeric chars
-            t = re.sub('\W*$', '', t) # trim trailing non-alphanumeric chars
+            t = re.sub('^\W*', '', t)  # trim leading non-alphanumeric chars
+            t = re.sub('\W*$', '', t)  # trim trailing non-alphanumeric chars
         trimmed_tokens.append(t)
     return trimmed_tokens
 
@@ -64,8 +66,9 @@ def most_sim_overlap(query, responses):
             max_resp = r
     return max_resp
 
-# Code for loading the fasttext (word2vec) vectors from here (lightly
-# modified): https://fasttext.cc/docs/en/crawl-vectors.html
+# Code for loading the fasttext (word2vec) vectors
+# from here (lightly modified):
+# https://fasttext.cc/docs/en/crawl-vectors.html
 def load_vectors(fname):
     fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
     data = {}
@@ -74,120 +77,117 @@ def load_vectors(fname):
         data[tokens[0]] = list(map(float, tokens[1:]))
     return data
 
-
 def sum_lists(*args):
     return list(map(sum, zip(*args)))
 
-def response_vector_calc(word_vec,responses):
-    t={}
-    i=0
-    result=[0]*300
+def response_vector_calc(word_vec, responses):
+    t = {}
+    i = 0
+    result = [0] * 300
     for res in responses:
-        r_tokenize=tokenize(res)
-        norm_vec={}
-        n=0
+        r_tokenize = tokenize(res)
+        norm_vec = {}
+        n = 0
         for word in r_tokenize:
-            emb={}
+            emb = {}
             if word in word_vec.keys():
-                emb[word]=word_vec[word]
-                norm_den={}
-                norm_term=0
+                emb[word] = word_vec[word]
+                norm_den = {}
+                norm_term = 0
                 for v in emb[word]:
-                    norm_term+=v**2
-                norm_term=math.sqrt(norm_term)
-                norm_den[word]=norm_term
-                
-                s=[]
+                    norm_term += v ** 2
+                norm_term = math.sqrt(norm_term)
+                norm_den[word] = norm_term
+
+                s = []
                 for v in emb[word]:
-                    s.append(v/norm_den[word])
+                    s.append(v / norm_den[word])
 
-                norm_vec[word]=s
-                n=n+1
+                norm_vec[word] = s
+                n = n + 1
 
-        if(n==0):
-            n=len(r_tokenize)
-        l=[]
+        if n == 0:
+            n = len(r_tokenize)
+        l = []
         for i in norm_vec.values():
             l.append(i)
 
         for i in range(len(l)):
-            a=result
-            b=l[i]
-            result=sum_lists(a,b)
+            a = result
+            b = l[i]
+            result = sum_lists(a, b)
         result[:] = [x / n for x in result]
-        t[res]=result
+        t[res] = result
 
     return t
 
-        
-    
-def vec_calc(word_vec,query):
-    t={}
-    result=[0]*300
-    q_tokenize=tokenize(query)
-    norm_vec={}
-    n=0
+def vec_calc(word_vec, query):
+    t = {}
+    result = [0] * 300
+    q_tokenize = tokenize(query)
+    norm_vec = {}
+    n = 0
     for word in q_tokenize:
-        emb={}
+        emb = {}
 
         if word in word_vec.keys():
-            emb[word]=word_vec[word]
-            norm_den={}
-            norm_term=0
+            emb[word] = word_vec[word]
+            norm_den = {}
+            norm_term = 0
             for v in emb[word]:
-                norm_term+=v**2
-            norm_term=math.sqrt(norm_term)
-            norm_den[word]=norm_term
-            
-            s=[]
+                norm_term += v ** 2
+            norm_term = math.sqrt(norm_term)
+            norm_den[word] = norm_term
+
+            s = []
             for v in emb[word]:
-                s.append(v/norm_den[word])
+                s.append(v / norm_den[word])
 
-            norm_vec[word]=s
-            n=n+1
+            norm_vec[word] = s
+            n = n + 1
 
-    if(n==0):
-        n=len(q_tokenize)
-    l=[]
+    if n == 0:
+        n = len(q_tokenize)
+    l = []
     for i in norm_vec.values():
         l.append(i)
 
     for i in range(len(l)):
-        a=result
-        b=l[i]
-        result=sum_lists(a,b)
+        a = result
+        b = l[i]
+        result = sum_lists(a, b)
     result[:] = [x / n for x in result]
-    t[query]=result
+    t[query] = result
     return t
 
-def most_sim(calc_query_vector, resp_vec,responses,query):
+def most_sim(calc_query_vector, resp_vec, responses, query):
     max_sim = 0
     max_resp = "Sorry, I don't understand"
-    norm_term=0
+    norm_term = 0
 
     for v in calc_query_vector[query]:
-        norm_term+=v**2
-    norm_term=math.sqrt(norm_term)
-    query_mag=norm_term
+        norm_term += v ** 2
+    norm_term = math.sqrt(norm_term)
+    query_mag = norm_term
 
     for res in responses:
-        cosine_sim=0
-        norm_term=0
+        cosine_sim = 0
+        norm_term = 0
 
         for v in resp_vec[res]:
-            norm_term+=v**2
-        norm_term=math.sqrt(norm_term)
-        resp_mag=norm_term
-        tot_mag= query_mag*resp_mag
+            norm_term += v ** 2
+        norm_term = math.sqrt(norm_term)
+        resp_mag = norm_term
+        tot_mag = query_mag * resp_mag
 
-        vec_mul=list(map(lambda x,y: x*y ,calc_query_vector[query],resp_vec[res]))
-        summation=0
+        vec_mul = list(map(lambda x, y: x * y, calc_query_vector[query], resp_vec[res]))
+        summation = 0
         for i in vec_mul:
-            summation+=i
-        if tot_mag==0:
-            return 'Sorry, I dont understand'
+            summation += i
+        if tot_mag == 0:
+            return "Sorry, I don't understand"
 
-        cosine_sim=summation/tot_mag
+        cosine_sim = summation / tot_mag
 
         if cosine_sim > max_sim:
             max_sim = cosine_sim
@@ -213,9 +213,8 @@ def chat():
     if method == 'overlap':
         response = most_sim_overlap(user_turn, responses)
     elif method == 'w2v':
-        calc_query_vector = vec_calc(word_vectors,user_turn)
-        response=most_sim(calc_query_vector, resp_vec,responses,user_turn)
-
+        calc_query_vector = vec_calc(word_vectors, user_turn)
+        response = most_sim(calc_query_vector, resp_vec, responses, user_turn)
 
     # Add the current turn to the conversation
     insert_db(
@@ -249,7 +248,7 @@ def delete_chat():
 
         cursor.execute('DELETE FROM chat_history WHERE email = ? AND user_turn = ?', (user_email, user_turn))
         conn.commit()
-        
+
         existing_turns = query_db('SELECT * FROM chat_history WHERE email = ? ORDER BY id', (user_email,))
         conversation = []
 
@@ -259,13 +258,13 @@ def delete_chat():
                 conversation.append(turn.chatbot_reply)
 
         return render_template('index.html', conversation=conversation, user_email=user_email)
-    
+
     except Exception as e:
         # Print the error message for debugging
         print(f"Error deleting chat: {str(e)}")
 
         return jsonify(success=False, error=str(e))
-    
+
 @app.route('/delete_entire_chat', methods=['GET'])
 def delete_entire_chat():
     user_email = request.args.get('email', '')
@@ -277,7 +276,6 @@ def delete_entire_chat():
 
     # Return a JSON response indicating success
     return jsonify(success=True)
-
 
 def query_db(query, args=(), one=False):
     cur = get_db().execute(query, args)
