@@ -1,0 +1,39 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Web App</title>
+</head>
+<body>
+    <h1>Chatbot Web App</h1>
+    
+    <form action="/chat" method="post">
+        <label for="user_email">Your Email:</label>
+        <input type="email" id="user_email" name="user_email">
+
+        <label for="user_turn">User Turn:</label>
+        <input type="text" id="user_turn" name="user_turn" {% if not conversation or 'end_chat' not in request.form %}required{% endif %}>
+
+        <label for="method">Select Method:</label>
+        <select id="method" name="method">
+            <option value="w2v" {% if method == 'w2v' %}selected{% endif %}>Word2Vec</option>
+            <option value="overlap" {% if method == 'overlap' %}selected{% endif %}>Overlap</option>
+        </select>
+
+        <button type="submit">Send</button>
+
+        {% if conversation %}
+            <button type="submit" name="end_chat" value="true" formnovalidate>End Chat</button>
+        {% endif %}
+    </form>
+
+    {% if conversation %}
+        <h2>Conversation History:</h2>
+        {% for turn in conversation %}
+            <p>{{ turn }}</p>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>
