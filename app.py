@@ -196,6 +196,10 @@ def most_sim(calc_query_vector, resp_vec, responses, query):
     return max_resp
 
 @app.route('/')
+def home():
+    return render_template('homepage.html')
+
+@app.route('/index')
 def index():
     return render_template('index.html')
 
@@ -301,4 +305,6 @@ if __name__ == '__main__':
     responses = [x.strip() for x in open(responses_fname)]
     resp_vec = response_vector_calc(word_vectors, responses)
 
-    app.run()
+    app.run(host='0.0.0.0',port=5000)
+
+
