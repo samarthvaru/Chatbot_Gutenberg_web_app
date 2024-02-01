@@ -1,0 +1,55 @@
+<!-- templates/error.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Chatbot Web App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #ff3333;
+            margin-top: 100px;
+        }
+
+        p {
+            margin-top: 20px;
+            color: #555;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            cursor: pointer;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Oops! Something went wrong.</h1>
+    <p>We're sorry, but an unexpected error occurred. Please try again later.</p>
+    <button onclick="backToHomepage()">Back to Homepage</button>
+
+    <script>
+        function backToHomepage() {
+            window.location.href = "/index";
+        }
+    </script>
+</body>
+</html>
