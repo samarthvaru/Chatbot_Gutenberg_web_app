@@ -18,6 +18,33 @@ The application follows a simple client-server architecture:
 - **Chat History:** The application keeps track of the conversation history, allowing users to see past interactions.
 - **Delete Chat:** Users have the option to delete specific turns or the entire chat history.
 
+## Word Embeddings and Document Representation
+
+### Learning Word Embeddings
+
+Word embeddings, such as Word2Vec and FastText, provide vector representations for each word (type). These embeddings capture semantic relationships between words and are crucial for various natural language processing tasks.
+
+### Document Representation
+
+To represent the meaning of a short document, such as a user turn or a line from the Gutenberg corpus, one common approach is to combine the vectors of individual words in the document. This can be achieved by adding together the vectors for each word in the document.
+
+#### Formula for Document Representation
+
+Let ~vi be the embedding vector for the type corresponding to token i. The vector ~t representing the text is formed by adding the normalized vectors of all tokens in the text:
+
+\[ \vec{t} = \frac{1}{n} \sum_{i=1}^{n} \vec{v_i} \]
+
+Here, n is the number of tokens in the document.
+
+#### Handling Words Without Vectors
+
+If a word in the document does not have a corresponding vector, it is simply ignored in the process of forming the representation. If all words in a user query lack vectors, making it impossible to form a vector representing the turn, a default response (e.g., "I'm sorry?" or "I don't understand") is provided.
+
+This approach helps in capturing the overall meaning of the document by considering the semantic contributions of individual words.
+
+Feel free to explore and experiment with different embedding models to enhance the understanding of document content.
+
+
 ## Dependencies
 
 The application uses the following dependencies:
