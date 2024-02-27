@@ -4,6 +4,10 @@
 
 This web application provides a chatbot interface allowing users to interact with a chatbot using different methods, such as overlap and Word2Vec. The application is built using Flask (Python) for the backend and HTML for the frontend.
 
+## Check the live project
+
+https://chatbot-gutenberg-web-app.onrender.com
+
 ## Architecture
 
 The application follows a simple client-server architecture:
@@ -99,6 +103,7 @@ The application uses the following dependencies:
 4. To end the chat, click "End Chat."
 
 5. To delete a specific turn or the entire chat history, use the provided buttons.
+
 
 
 ### Additional Information
