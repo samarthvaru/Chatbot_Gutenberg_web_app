@@ -118,6 +118,6 @@ The application is set to run on http://0.0.0.0:5000 by default.
 ### CONTRIBUTORS
 
 Samarth Varu
-varusamarth@gmail.com
+svaru2306@gmail.com
 
 Feel free to contribute or report issues!
